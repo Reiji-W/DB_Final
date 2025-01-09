@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add User</title>
+</head>
+<body>
+    <h1>Add New User</h1>
+    <form action="/add_user" method="post">
+        <label for="id">User ID:</label><br>
+        <input type="text" id="id" name="id" required><br><br>
+        
+        <label for="name">Name:</label><br>
+        <input type="text" id="name" name="name" required><br><br>
+        
+        <label for="password">Password:</label><br>
+        <input type="password" id="password" name="password" required><br><br>
+        
+        <label for="is_admin">Admin:</label>
+        <input type="checkbox" id="is_admin" name="is_admin"><br><br>
+        
+        <button type="submit">Add User</button>
+    </form>
+    <p><a href="/">Back to Home</a></p>
+</body>
+</html>
