@@ -1,20 +1,20 @@
-﻿from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+﻿from flask import Flask, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 app.secret_key = 'secret_key'  # セッション管理のためのキー
 
-# データベース設定
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///club_management.db'
+# データベース設定（PostgreSQL）
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://guest:password@postgres_db/my-db"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 # ユーザーモデル
 class Users(db.Model):
-    id = db.Column(db.String(10), primary_key=True)  # IDを文字列に変更
+    id = db.Column(db.String(10), primary_key=True)
     name = db.Column(db.String(50), nullable=False)
-    password = db.Column(db.String(50), nullable=False)  # パスワード
-    is_admin = db.Column(db.Boolean, default=False)  # 管理者フラグ
+    password = db.Column(db.String(50), nullable=False)
+    is_admin = db.Column(db.Boolean, default=False)
 
 # クラブモデル
 class Clubs(db.Model):
@@ -32,17 +32,16 @@ class Members(db.Model):
     contact = db.Column(db.String(50), nullable=False)
     club = db.relationship('Clubs', backref=db.backref('members', lazy=True))
 
-# 初期化用ルート
+# データベース初期化
 @app.route('/init', methods=['GET'])
 def init_db():
     db.create_all()
-    # 初回に管理者ユーザーを追加
     admin = Users(id='001', name='Admin', password='admin', is_admin=True)
     db.session.add(admin)
     db.session.commit()
     return "Database initialized!"
 
-# ログイン画面
+# ログイン
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -101,6 +100,18 @@ def add_club():
     db.session.commit()
     return redirect(url_for('home'))
 
+# クラブ削除（管理者のみ）
+@app.route('/clubs/<int:club_id>', methods=['DELETE'])
+def delete_club(club_id):
+    if 'user_id' not in session or not session.get('is_admin', False):
+        return {"message": "Unauthorized"}, 403
+    club = Clubs.query.get(club_id)
+    if not club:
+        return {"message": "Club not found"}, 404
+    db.session.delete(club)
+    db.session.commit()
+    return {"message": "Club deleted successfully"}, 200
+
 # メンバー登録
 @app.route('/add_member', methods=['POST'])
 def add_member():
@@ -115,5 +126,17 @@ def add_member():
     db.session.commit()
     return redirect(url_for('home'))
 
+# メンバー削除（管理者のみ）
+@app.route('/members/<int:member_id>', methods=['DELETE'])
+def delete_member(member_id):
+    if 'user_id' not in session or not session.get('is_admin', False):
+        return {"message": "Unauthorized"}, 403
+    member = Members.query.get(member_id)
+    if not member:
+        return {"message": "Member not found"}, 404
+    db.session.delete(member)
+    db.session.commit()
+    return {"message": "Member deleted successfully"}, 200
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host="0.0.0.0")

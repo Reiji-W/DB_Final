@@ -15,12 +15,12 @@
 
     <h2>Register a New Club</h2>
     {% if is_admin %}
-    <form action="/add_club" method="post">
+    <form action="/clubs" method="post">
         <label for="club_name">Club Name:</label><br>
         <input type="text" id="club_name" name="club_name" required><br><br>
         
         <label for="description">Description:</label><br>
-        <textarea id="description" name="description" rows="4" cols="50"></textarea><br><br>
+        <textarea id="description" name="description" rows="4" cols="50" required></textarea><br><br>
         
         <label for="capacity">Capacity:</label><br>
         <input type="number" id="capacity" name="capacity" required><br><br>
@@ -84,16 +84,19 @@
             fetch(`/clubs/${clubId}`, {
                 method: 'DELETE',
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.message) {
-                    alert(data.message);
-                    location.reload();
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => { throw new Error(err.message); });
                 }
+                return response.json();
+            })
+            .then(data => {
+                alert(data.message);
+                location.reload();
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Failed to delete the club.');
+                alert(error.message || "Failed to delete the club.");
             });
         }
 
@@ -112,7 +115,7 @@
                 console.error('Error:', error);
                 alert('Failed to delete the member.');
             });
-        }
+    }
     </script>
 </body>
 </html>

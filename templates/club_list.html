@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Club List</title>
+</head>
+<body>
+    <h2>Registered Clubs</h2>
+    <table border="1">
+        <tr>
+            <th>Club Name</th>
+            <th>Description</th>
+            <th>Capacity</th>
+        </tr>
+        {% for club in clubs %}
+        <tr>
+            <td>{{ club.club_name }}</td>
+            <td>{{ club.description }}</td>
+            <td>{{ club.capacity }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <a href="/">Back to Home</a>
+</body>
+</html>
